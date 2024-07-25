@@ -1,0 +1,7 @@
+dependencies:
+  esp_io_expander:
+    version: ^1.0.1
+  idf: '>=4.4.2'
+description: ESP IO Expander - PCAL6416A
+url: https://github.com/dominicpoeschko/esp_io_expander_PCAL6416A_16bit
+version: 1.0.1
