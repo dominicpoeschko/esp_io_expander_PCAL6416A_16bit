@@ -13,7 +13,7 @@
 #include <string.h>
 
 /* Timeout of each I2C communication */
-#define I2C_TIMEOUT_MS (10)
+#define I2C_TIMEOUT_MS (1000)
 
 #define IO_COUNT (16)
 
