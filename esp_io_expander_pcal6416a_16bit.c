@@ -5,6 +5,8 @@
 #include "esp_check.h"
 #include "esp_io_expander_pcal6416a_16bit.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -57,14 +59,6 @@ esp_err_t esp_io_expander_new_i2c_pcal6416a_16bit(
       = (esp_io_expander_pcal6416a_16bit_t*)calloc(1, sizeof(esp_io_expander_pcal6416a_16bit_t));
     ESP_RETURN_ON_FALSE(pcal, ESP_ERR_NO_MEM, TAG, "Malloc failed");
 
-    i2c_device_config_t dev_cfg = {
-      .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-      .device_address  = i2c_address,
-      .scl_speed_hz    = 100000,
-    };
-    esp_err_t ec = i2c_master_bus_add_device(bus_handle, &dev_cfg, &pcal->dev_handle);
-    ESP_GOTO_ON_ERROR(ec != ESP_OK, err, TAG, "Bus add device failed");
-
     pcal->base.config.io_count               = IO_COUNT;
     pcal->base.config.flags.dir_out_bit_zero = 1;
     pcal->base.read_input_reg                = read_input_reg;
@@ -75,7 +69,20 @@ esp_err_t esp_io_expander_new_i2c_pcal6416a_16bit(
     pcal->base.del                           = del;
     pcal->base.reset                         = reset;
 
+    i2c_device_config_t dev_cfg = {
+      .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+      .device_address  = i2c_address,
+      .scl_speed_hz    = 100000,
+    };
+
     esp_err_t ret = ESP_OK;
+
+    ESP_GOTO_ON_ERROR(
+      i2c_master_bus_add_device(bus_handle, &dev_cfg, &pcal->dev_handle),
+      err,
+      TAG,
+      "Bus add device failed");
+
     /* Reset configuration and register status */
     ESP_GOTO_ON_ERROR(reset(&pcal->base), err2, TAG, "Reset failed");
 
